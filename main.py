@@ -63,7 +63,7 @@ def calculate_exponent(file_path):
 
 def calculate_number_of_digits(exponent):
     # Calculate the number of digits
-    print("exponent", exponent)
+    # print("exponent", exponent)
 
     result = mp.power(2, exponent)
 
@@ -84,42 +84,60 @@ def draw_vertical_lines(x_coords, y_min, y_max, color, ax):
 
 # Function to traverse upward
 def traverse_top(a,c1,c2,y,ax):
-    print("travese_top")
+    print("travese_topping...")
     point=a
     print("step", step)
     n = 0
     while(point<c2):
         n = n + 1
-        next = point + step
+        if(point + step > c2):
+            deviation = c2 - round_mpf(point, 0)
+            next = point + deviation
+        else:
+            next = point + step
         point=next 
         y = y + step
         path.append({"shape": "triangle", "equation": [f"x=2^{point}", "y=1", f"2^{y}*x+(2^{point}-2^{next})*y=2^({y}+{next})"]})
-        if(point + step > c2):
-           path.append("Terminate Point coordinate: 2^{}\n".format(next))
-           path.append("Total repetitions: {}".format(n))
-           write_json(path)
-           with open("Terminate-coordinate-exponent.txt", "w") as file:
+        if(point > c2):
+            path.append("Terminate Point coordinate: 2^{}\n".format(next))
+            path.append("Total repetitions: {}".format(n))
+            write_json(path)
+            with open("Deviatioin.txt", "w") as file:
+                file.write(f"{step - deviation}")
+            with open("Terminate-coordinate-exponent.txt", "w") as file:
                 # file.write(f"Terminate Point coordinate: (2^{next}, 1)")
+                file.write(f"{next}")
+            with open("Terminate-coordinate-integer.txt", "w") as file:
                 file.write(f"{calculate_number_of_digits(next)}")
 
 # Function to traverse downward
 def traverse_down(start_point_x,c1,c2,y,ax):
-    print('traverse_down')
+    print('traverse_downing...')
     point = start_point_x
     n=0
     while(point>c1):
         n = n + 1
-        next= point - step
+        if(point - step < c1):
+            print("point", round_mpf(point,1))
+            print("round_mpf(point, 0)", round_mpf(point, 0))
+            deviation = round_mpf(point, 0) - c1 - 1
+            next = point - deviation
+        else:
+            next= point - step
         point=next
         y = y - step
         path.append({"shape": "triangle", "equation": [f"x=2^{round_mpf(point, 10)}", "y=1", f"2^{y}*x+(2^{round_mpf(point, 10)}-2^{round_mpf(next, 10)})*y=2^({y}+{round_mpf(next, 10)})"]})
         # polygons.append({ "p1" : (log_scale(2 ** point), 1), 'p2': (log_scale(2 ** next), 1), 'p3': (log_scale(2 ** point), log_scale(2 ** y))})
-        if(point - step < c1):
-            path.append("Terminate Point coordinate: 2^{}\n".format(next))
+        if(point <= c1):
+            path.append("Terminate Point coordinate: 2^{}\n".format(round_mpf(next, 10)))
             path.append("Total repetitions: {}".format(n))
             write_json(path)
-            with open("Terminate-coordinate-exponent.txt", "w") as file:
+            with open("Deviatioin.txt", "w") as file:
+                file.write(f"{deviation - step}")
+            with open("Term_For_Calc.txt", "w") as file:
                 file.write(f"{next}")
+            with open("Terminate-coordinate-exponent.txt", "w") as file:
+                file.write(f"{round_mpf(next, 10)}")
             with open("Terminate-coordinate-integer.txt", "w") as file:
                 file.write(f"{calculate_number_of_digits(next)}")
 
@@ -173,7 +191,7 @@ def main():
 
     file_path = 'start-coordinate.txt'
     exponent = calculate_exponent(file_path)
-    print("Read start-coordinate.txt success, the x-coordinate of start point: 2^", exponent)
+    print("Read start-coordinate.txt success, the x-coordinate of start point: 2^", round_mpf(exponent, 15), "...")
     fig, ax = plt.subplots()
 
     # Draw the triangle
@@ -191,7 +209,10 @@ def main():
     # Define under limit and over limit
     c1=max(green_lines[0], green_lines[1])
     c2=min(green_lines[0], green_lines[1])
-
+    if(start_point_x < purple_lines[0] or start_point_x > purple_lines[1]):
+        print("Start point is not between purple lines. Please input correctly.")
+        exit()
+    
     print("C1, C2", c1, c2)
 
     if(c2 > start_point_x):

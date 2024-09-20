@@ -53,6 +53,7 @@ def exp_and_coef_to_integer(coefficient, exponent):
     return reconstructed_int
 
 def draw(end):
+
     with open(path, "w") as file:
         file.write(f"Start Coordinate From Terminate Coordinate: 2^{end}")
     # digits = calculate_large_power_digits(2, end)
@@ -61,11 +62,14 @@ def draw(end):
     with open("Calc-Start-Coordinate-By-Integer.txt", "w") as file:
         file.write(f"{digits}")
 def cal(n,b,y):
-    with open("Terminate-coordinate.txt", 'r') as file:
+    with open("Deviatioin.txt", "r") as file:
+        deviation = file.read().strip()
+    with open("Terminate-coordinate-exponent.txt", 'r') as file:
         start_coordinate_str = file.read().strip()
     if(start_coordinate_str): 
         print("Read Terminate-coordinate Success.")
     start_coordinate = mpmath.mpf(start_coordinate_str)
+    start_coordinate = mpmath.mpf(start_coordinate) + mpmath.mpf(deviation)
     print("Terminate coordinate", start_coordinate)
     point=start_coordinate
     for _ in range(n):
