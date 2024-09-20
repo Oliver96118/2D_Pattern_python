@@ -11,7 +11,7 @@ polygons = []
 step = mp.mpf(750100./325)
 
 # Set the precision (number of decimal places)
-mp.dps = 218506
+mp.dps = 220000
 
 # Log scaling function for large numbers
 def log_scale(value):
@@ -24,8 +24,13 @@ def round_mpf(number, decimal_places):
     rounded_str = mp.nstr(number, decimal_places + 1)
     return mp.mpf(rounded_str)
 
+def convert_with_precision(value, precision):
+    with mp.workdps(precision):
+        return mp.mpf(value)
+    
 # Function for reading start-coordinate.txt
 def calculate_exponent(file_path):
+    print("Calculating exponent of start coordinate...")
     try:
         with open(file_path, 'r') as file:
             start_coordinate_str = file.read().strip()
@@ -118,9 +123,9 @@ def traverse_down(start_point_x,c1,c2,y,ax):
     while(point>c1):
         n = n + 1
         if(point - step < c1):
-            print("point", round_mpf(point,1))
-            print("round_mpf(point, 0)", round_mpf(point, 0))
-            deviation = round_mpf(point, 0) - c1 - 1
+            print("convert_with_precision(point, 1)", int(point))
+            deviation = int(point) - c1 + 1
+            print("deviation", deviation)
             next = point - deviation
         else:
             next= point - step
@@ -137,7 +142,7 @@ def traverse_down(start_point_x,c1,c2,y,ax):
             with open("Term_For_Calc.txt", "w") as file:
                 file.write(f"{next}")
             with open("Terminate-coordinate-exponent.txt", "w") as file:
-                file.write(f"{round_mpf(next, 10)}")
+                file.write(f"2^{convert_with_precision(next, 10)}")
             with open("Terminate-coordinate-integer.txt", "w") as file:
                 file.write(f"{calculate_number_of_digits(next)}")
 
@@ -162,11 +167,6 @@ def main():
     with open('pattern.json', "w") as file:
         file.write("")
 
-    # Input vertices for the triangle
-    # print("Enter the vertices of the triangle (format: x,y):")
-    # v1 = tuple(map(int, input("Exponent for Vertex 1 (e.g., for 2^500000 enter 500000): ").split(',')))
-    # v2 = tuple(map(int, input("Exponent for Vertex 2 (e.g., for 2^500000 enter 500000): ").split(',')))
-    # v3 = tuple(map(int, input("Exponent for Vertex 3 (e.g., for 2^500000 enter 500000): ").split(',')))
     v1 = (0,0)
     v2 = (750000, 0)
     v3 = (750000, 750000)
@@ -188,10 +188,10 @@ def main():
     # start_point = (
     #     Decimal(input("Enter the exponents of the x-coordinate of the start point (e.g., for 2^400000 enter 400000): ")),
     # )
-
+    print("Reading start coordinate from start-coordinate.txt...")
     file_path = 'start-coordinate.txt'
     exponent = calculate_exponent(file_path)
-    print("Read start-coordinate.txt success, the x-coordinate of start point: 2^", round_mpf(exponent, 15), "...")
+    print("Read and calculate start coordinate success, the x-coordinate of start point: 2^", round_mpf(exponent, 15), "...")
     fig, ax = plt.subplots()
 
     # Draw the triangle
